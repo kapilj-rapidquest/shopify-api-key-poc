@@ -1,0 +1,21 @@
+*.pyc
+*.table
+!.gitignore
+!routes.py
+!README
+httpserver.log
+httpserver.pid
+parameters*.py
+
+/applications/__pycache__/
+/applications/*/__pycache__/
+/applications/*/modules/__pycache__/
+/applications/*/databases/
+/applications/*/errors/
+/applications/*/sessions/
+/applications/*/cache/
+
+/temp
+
+#Config Files
+/applications/*/modules/config.py

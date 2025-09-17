@@ -1,0 +1,54 @@
+name: Replace Shopify Meta Tag
+
+on:
+  push:
+    branches:
+      - dev
+      - qa
+      - prod
+      - '*'   # any other branch if you want
+
+jobs:
+  update-meta:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Determine client ID based on branch
+        id: set-client-id
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
+            echo "CLIENT_ID=7788994455" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF_NAME}" == "qa" ]]; then
+            echo "CLIENT_ID=8899445566" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF_NAME}" == "prod" ]]; then
+            echo "CLIENT_ID=9944556611" >> $GITHUB_ENV
+          else
+            echo "CLIENT_ID=223311665544" >> $GITHUB_ENV
+          fi
+
+      - name: Replace meta tag in shopify-meta.html
+        run: |
+          sed -i "s|<meta name=\"shopify-api-key\" content=\".*\" />|<meta name=\"shopify-api-key\" content=\"$CLIENT_ID\" />|" applications/whatsapp/static/shopify-meta.html
+
+      - name: Recompile static files
+        run: |
+          cd applications/whatsapp
+          python htmlx.py -w static -m debug
+
+      # Optional: commit changes back to repo
+      - name: Commit and push changes
+        if: github.ref != 'refs/heads/prod' # maybe you only want this on dev/qa
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add applications/whatsapp/static/shopify-meta.html applications/whatsapp/static/dist
+          git commit -m "Update Shopify meta tag for ${GITHUB_REF_NAME}"
+          git push

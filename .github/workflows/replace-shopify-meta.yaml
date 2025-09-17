@@ -46,7 +46,7 @@ jobs:
       - name: Recompile static files
         run: |
           cd applications/whatsapp
-          python htmlx.py -w static -m debug
+          python htmlx.py -c static -m debug
 
       # Optional: commit changes back to repo
       - name: Commit and push changes
